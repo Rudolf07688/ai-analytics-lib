@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ..
+      dockerfile: examples/Dockerfile.backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4}
+    volumes:
+      - ..:/app
+    command: uvicorn sql_chat_api:app --host 0.0.0.0 --port 8000 --reload
+    working_dir: /app/examples
+
+  frontend:
+    build:
+      context: ./sql-chat-frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./sql-chat-frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
