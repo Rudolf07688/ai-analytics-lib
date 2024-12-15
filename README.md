@@ -18,6 +18,8 @@ A modular Python library for AI analytics with deployable agents.
 pip install ai-analytics
 ```
 
+See the [Quick Start](#quick-start) section below for usage examples, or check out the [Running with Docker](#running-with-docker) section for containerized deployment.
+
 ## Quick Start
 
 ### Text Analysis
@@ -40,42 +42,47 @@ print(result)
 ### SQL Chat
 
 ```python
+import asyncio
 from ai_analytics import SQLChatAgent, SQLChatRequest
 from ai_analytics.config import Settings
 from ai_analytics.database import PostgresConnection
 
-# Initialize database connection
-db = PostgresConnection(
-    host="localhost",
-    database="your_db",
-    user="user",
-    password="password",
-    table="your_table"
-)
+async def main():
+    # Initialize database connection
+    db = PostgresConnection(
+        host="localhost",
+        database="your_db",
+        user="user",
+        password="password",
+        table="your_table"
+    )
 
-# Initialize agent
-settings = Settings(openai_api_key="your-key")
-agent = SQLChatAgent(settings, database=db)
+    # Initialize agent
+    settings = Settings(openai_api_key="your-key")
+    agent = SQLChatAgent(settings, database=db)
 
-# Ask a question
-request = SQLChatRequest(
-    question="What were the top 5 sales by revenue last month?",
-    context="We're interested in completed sales only"
-)
+    # Ask a question
+    request = SQLChatRequest(
+        question="What were the top 5 sales by revenue last month?",
+        context="We're interested in completed sales only"
+    )
 
-# Get results
-response = await agent.execute(request)
-print(f"SQL Query: {response['generated_sql']}")
-print(f"Results: {response['results']}")
+    # Get results
+    response = await agent.execute(request)
+    print(f"SQL Query: {response['generated_sql']}")
+    print(f"Results: {response['results']}")
 
-# Get suggested questions
-questions = await agent.suggest_questions()
-print("Suggested questions:", questions)
+    # Get suggested questions
+    questions = await agent.suggest_questions()
+    print("Suggested questions:", questions)
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ## SQL Chat API
 
-The library includes a FastAPI application for deploying SQL Chat functionality as a web service.
+The library includes a FastAPI application for deploying SQL Chat functionality as a web service. See the [examples/sql_chat_api.py](examples/sql_chat_api.py) file for implementation details.
 
 ### Running the API
 
@@ -94,12 +101,13 @@ pip install python-dotenv httpx
 
 3. Start the API server:
 ```bash
+cd examples
 uvicorn sql_chat_api:app --reload
 ```
 
 4. Test the API:
 ```bash
-python test_sql_chat_api.py
+python examples/test_sql_chat_api.py
 ```
 
 ### API Endpoints
@@ -179,7 +187,7 @@ The examples directory includes a complete setup for running both the backend AP
 The Docker setup includes:
 
 1. Backend Service:
-   - FastAPI application
+   - FastAPI application (see [SQL Chat API](#sql-chat-api) section)
    - Automatic code reloading
    - Volume mounted for development
    - Exposed on port 8000
@@ -199,7 +207,7 @@ The Docker setup includes:
 
 ## Project Structure
 
-```
+```plaintext
 ai_analytics_lib/
 ├── src/
 │   └── ai_analytics/
